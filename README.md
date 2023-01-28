@@ -1,4 +1,4 @@
-## Task 2: Build A Storefront Backend
+## Task 2: Storefront Backend
 
 This is a backend API build in Nodejs for an online store. It exposes a RESTful API that will be used by the frontend developer on the frontend. 
 
