@@ -1,4 +1,4 @@
-## Task 2: Build A Storefront Backend
+## Task 2: Storefront Backend
 
 Udacity Advanced Full-stack nano degree second project
 
@@ -45,7 +45,7 @@ Udacity Advanced Full-stack nano degree second project
 
 ### APP
 
-This App RUNS port PORT 3000 [http://localhost:4000](http://localhost:4000)
+This App RUNS port PORT 3000 [http://localhost:3000](http://localhost:3000)
 
 * BUT YOU CAN CHANGE THIS IN THE SERVER FILE IF NEEDED
 
