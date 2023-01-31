@@ -1,87 +1,76 @@
-import bcrypt from 'bcrypt';
-import { pool, parseError } from '../database';
-import { generateToken } from '../../utils';
-import {
-  UserReturnType,
-  UserType,
-  UserCreatedReturnType
-} from '../controller/user';
-import { PoolClient, QueryResult } from 'pg';
+import client from "../db";
 
-export class User {
-  // define table
-  table: string = 'users';
+// 1 - Make a User type
 
-  // select all users
-  async getUsers(): Promise<UserReturnType[]> {
-    try {
-      const conn: PoolClient = await pool.connect();
-      const sql: string = `SELECT * FROM ${this.table}`;
-      const result: QueryResult = await conn.query(sql);
-      conn.release();
+export type User = {
+    id?: Number;
+    firstName : string;
+    lastName: string;
+    email: string;
+    password: string;
+}
 
-      return result.rows;
-    } catch (err) {
-      throw new Error(`Could not get all users. Error: ${parseError(err)}`);
+// 2 - Making the usersStore Class and exporting it 
+
+export class usersStore {
+
+    // A - Create a user 
+   async create(user:User){
+        try{
+            const conn = await client.connect();
+            const sql = 'INSERT into users ("firstName","lastName","email","password") VALUES($1,$2,$3,$4) RETURNING *';
+
+            const result = await conn.query(sql, [user.firstName, user.lastName, user.email, user.password])
+            conn.release();
+
+            return result.rows[0]
+        }catch(err){
+            return 'Check your entries'
+        }   
     }
-  }
 
-  // select user by id
-  async getUserById(userId: number): Promise<UserReturnType> {
-    try {
-      const conn: PoolClient = await pool.connect();
-      const sql: string = `SELECT * FROM ${this.table} WHERE id = $1`;
-      const result: QueryResult = await conn.query(sql, [userId]);
-      conn.release();
+    // B - index users
+    async index(){
+        try{
+            const conn = await client.connect();
+            const sql = 'SELECT * FROM users';
 
-      return result.rows[0];
-    } catch (err) {
-      throw new Error(`Could not get user by id. Error: ${parseError(err)}`);
+            const result = await conn.query(sql);
+            conn.release();
+
+            return result.rows;
+        }catch(err){
+            return 'Cannot get users'
+        }     
     }
-  }
 
-  // create a user
-  async createUser(user: UserType): Promise<UserCreatedReturnType> {
-    try {
-      const { firstname, lastname, password } = user;
-      const pepper: string = process.env.BCRYPT_PASSWORD as string;
-      const salt: string = process.env.SALT_ROUNDS as string;
+    // C- Show user by id
+    async show(id:string){
+        try{
+            const conn = await client.connect();
+            const sql = 'SELECT * FROM users where id=$1';
 
-      const hashPassword: string = bcrypt.hashSync(
-        password + pepper,
-        parseInt(salt)
-      );
-      const conn: PoolClient = await pool.connect();
-      const sql: string = `INSERT INTO ${this.table} (firstName, lastName, password) VALUES($1, $2, $3) RETURNING *`;
-      const result: QueryResult = await conn.query(sql, [
-        firstname,
-        lastname,
-        hashPassword
-      ]);
-      conn.release();
+            const result = await conn.query(sql, [id])
+            conn.release();
 
-      const id: number = result.rows[0].id;
-      const token: string = generateToken(id);
-      return {
-        auth: true,
-        token
-      };
-    } catch (err) {
-      throw new Error(`Could not create user. Error: ${parseError(err)}`);
+            return result.rows[0]
+        }catch(err){
+            return 'Check user id'
+        }   
     }
-  }
 
-  // delete user
-  async deleteUser(id: number): Promise<UserReturnType> {
-    try {
-      const sql: string = `DELETE FROM ${this.table} WHERE id=$1 RETURNING *`;
-      const conn: PoolClient = await pool.connect();
-      const result: QueryResult = await conn.query(sql, [id]);
-      conn.release();
+    // D - Show by Email (new in this version)
+ /*   async showByMail(email:string): Promise<User>{
+        try{
+            const conn = await client.connect();
+            const sql = 'SELECT * FROM users where email=$1';
 
-      return result.rows[0];
-    } catch (err) {
-      throw new Error(`Could not delete user ${id}. Error: ${parseError(err)}`);
-    }
-  }
+            const result = await conn.query(sql, [email])
+            conn.release();
+
+            return result.rows[0]
+        }catch(err){
+            throw new Error(`${err}`);
+        }   
+    }*/
 }
