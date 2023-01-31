@@ -1,4 +1,4 @@
-# Storefront Backend Project
+## Task 2: Build A Storefront Backend
 
 Udacity Advanced Full-stack nano degree second project
 
