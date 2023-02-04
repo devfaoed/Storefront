@@ -2,9 +2,9 @@ import express, {Application, Request, Response} from "express"
 import bodyParser from "body-parser"
 import path from "path"
 
-import userRoutes from "./handlers/user"
-import productRoutes from "./handlers/product"
-import orderRoutes from "./handlers/orders"
+import userRoutes from "./controller/user"
+import productRoutes from "./controller/product"
+import orderRoutes from "./controller/orders"
 
 const app: Application = express()
 
