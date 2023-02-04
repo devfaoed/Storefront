@@ -1,77 +1,144 @@
-import client from "../db";
+import Client from "../db"
 
-// 1 - Make an order type
-export type Order = {
-    id?: Number;
-    user_id: Number;
-    status: String;
+export interface OrderProduct {
+  product_id: number,
+  quantity: number
 }
 
+export interface BaseOrder {
+  products: OrderProduct[];
+  user_id: number;
+  status: boolean;
+}
 
-// 2 - Making the orders store Class and exporting it 
-export class ordersStore{
+export interface Order extends BaseOrder {
+  id: number;
+}
 
-    // A - create an order 
-    async create(order:Order){
-        try{
-            const conn = await client.connect();
-            const sql = 'INSERT into orders (user_id,status) VALUES($1,$2) RETURNING *';
+export class OrderStore {
+  async index (): Promise<Order[]> {
+    try {
+      const connection = await Client.connect()
+      const sql = "SELECT * FROM orders"
 
-            const result = await conn.query(sql, [order.user_id, order.status]);
-            conn.release();
+      const {rows} = await connection.query(sql)
 
-            return result.rows[0]
-        }catch(err){
-            return 'Check your entries'
-        }
-        
+      const orderProductsSql = "SELECT product_id, quantity FROM order_products WHERE order_id=($1)"
+      const orders = []
+
+      for (const order of rows) {
+        const {rows: orderProductRows} = await connection.query(orderProductsSql, [order.id])
+        orders.push({
+          ...order,
+          products: orderProductRows
+        })
+      }
+
+      connection.release()
+
+      return orders
+    } catch (err) {
+      throw new Error(`Could not get orders. ${err}`)
     }
+  }
 
+  async create (order: BaseOrder): Promise<Order> {
+    const {products, status, user_id} = order
 
-    // B - index all orders 
-    async index(){
-        try{
-            const conn = await client.connect();
-            const sql = 'SELECT * FROM orders';
+    try {
+      const sql = "INSERT INTO orders (user_id, status) VALUES($1, $2) RETURNING *"
+      const connection = await Client.connect()
+      const {rows} = await connection.query(sql, [user_id, status])
+      const order = rows[0]
 
-            const result = await conn.query(sql);
-            conn.release();
+      const orderProductsSql = "INSERT INTO order_products (order_id, product_id, quantity) VALUES($1, $2, $3) RETURNING product_id, quantity"
+      const orderProducts = []
 
-            return result.rows;
-        }catch(err){
-            return 'Cannot get orders'
-        }
-        
+      for (const product of products) {
+        const {product_id, quantity} = product
+
+        const {rows} = await connection.query(orderProductsSql, [order.id, product_id, quantity])
+
+        orderProducts.push(rows[0])
+      }
+
+      connection.release()
+
+      return {
+        ...order,
+        products: orderProducts
+      }
+    } catch (err) {
+      throw new Error(`Could not add new order for user ${user_id}. ${err}`)
     }
-    
+  }
 
-    // C - show an order 
-    async show(id:string){
-        try{
-            const conn = await client.connect();
-            const sql = 'SELECT * FROM orders where id=$1';
+  async read (id: number): Promise<Order> {
+    try {
+      const sql = "SELECT * FROM orders WHERE id=($1)"
+      const connection = await Client.connect()
+      const {rows} = await connection.query(sql, [id])
+      const order = rows[0]
 
-            const result = await conn.query(sql, [id]);
-            conn.release();
+      const orderProductsSql = "SELECT product_id, quantity FROM order_products WHERE order_id=($1)"
+      const {rows: orderProductRows} = await connection.query(orderProductsSql, [id])
 
-            return result.rows[0]
-        }catch(err){
-            return 'Check order id'
-        }
-        
+      connection.release()
+
+      return {
+        ...order,
+        products: orderProductRows
+      }
+    } catch (err) {
+      throw new Error(`Could not find order ${id}. ${err}`)
     }
+  }
 
-    async showUsersOrders(id:string){
-        try{
-            const conn = await client.connect();
-            const sql = 'SELECT * FROM orders where user_id=$1';
+  async update (id: number, newOrderData: BaseOrder): Promise<Order> {
+    const {products, status, user_id} = newOrderData
 
-            const result = await conn.query(sql, [id]);
-            conn.release();
+    try {
+      const sql = "UPDATE orders SET status = $1 WHERE id = $2 RETURNING *"
+      const connection = await Client.connect()
+      const {rows} = await connection.query(sql, [status, id])
+      const order = rows[0]
 
-            return result.rows[0]
-        }catch(err){
-            return 'Check user id'
-        }        
+      const orderProductsSql = "UPDATE order_products SET product_id = $1, quantity = $2 WHERE order_id = $3 RETURNING product_id, quantity"
+      const orderProducts = []
+
+      for (const product of products) {
+        const {product_id, quantity} = product
+
+        const {rows} = await connection.query(orderProductsSql, [product_id, quantity, order.id])
+        orderProducts.push(rows[0])
+      }
+
+      connection.release()
+
+      return {
+        ...order,
+        products: orderProducts
+      }
+    } catch (err) {
+      throw new Error(`Could not update order for user ${user_id}. ${err}`)
     }
+  }
+
+  async deleteOrder (id: number): Promise<Order> {
+    try {
+      const connection = await Client.connect()
+      const orderProductsSql = "DELETE FROM order_products WHERE order_id=($1)"
+      await connection.query(orderProductsSql, [id])
+
+      const sql = "DELETE FROM orders WHERE id=($1)"
+      const {rows} = await connection.query(sql, [id])
+      const order = rows[0]
+
+      connection.release()
+
+      return order
+    } catch (err) {
+      throw new Error(`Could not delete order ${id}. ${err}`)
+    }
+  }
 }

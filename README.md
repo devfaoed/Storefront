@@ -1,113 +1,50 @@
-## Task 2: Build A Storefront Backend
+# Storefront Backend Project
 
-Udacity Advanced Full-stack nano degree second project
-
-## Tech
-
-* Runtime: Node.js (JavaScript)
-* Web application framework: Express
-* Language: TypeScript
-* Database: Postgres
-* Testing: Jasmine and Supertest
-
-## Dependancies: you can find them in package.json
-
-* bcrypt
-* body-parser
-* cors
-* db-migrate
-* db-migrate-pg
-* dotenv
-* express
-* jsonwebtoken
-* pg : using postgresql
-* typescript
-
-## DevDependancies
-
-* @types/bcrypt
-* @types/express
-* @types/jasmine
-* @types/jsonwebtoken
-* @types/pg
-* @types/supertest
-* @typescript-eslint/eslint-plugin
-* @typescript-eslint/parser
-* eslint
-* jasmine
-* jasmine-spec-reporter
-* jasmine-ts
-* supertest
-* ts-node
-* tsc-watch
-
-## The Ports
-
-### APP
-
-This App RUNS port PORT 3000 [http://localhost:4000](http://localhost:4000)
-
-* BUT YOU CAN CHANGE THIS IN THE SERVER FILE IF NEEDED
-
-### DATABASE
-
-RUNS ON PORT 5432 [http://localhost:5432](http://localhost:5432) (LOCAL HOST)
-
-* POSTGRES HOST IS AN ENVIRONMENT VARIABLE
-
-## Setup
-
-### databse runs on localhost:5432
-
-First you need install all packages from the terminal. since package.json contains them all, you just need to run this command
-
-```bash
-npm install
+## Prepare env
+- add a `.env` file in the root directory and set the missing `###` environment parameters
+```
+POSTGRES_HOST=127.0.0.1
+POSTGRES_PORT=5432
+POSTGRES_PORT_TEST=5433
+POSTGRES_DB=storefront
+POSTGRES_USER=###
+POSTGRES_PASSWORD=###
+BCRYPT_PASSWORD=###
+SALT_ROUNDS=10
+TOKEN_SECRET=###
 ```
 
-then open the psql terminal and Create the database
+## Set up
 
-```bash
-CREATE DATABASE <db_name>;
+- `docker-compose up` to start the docker container
+- `npm install` to install all dependencies
+- `npm run db-up` to set up the database and get access via http://127.0.0.1:5432
+- `npm run build` to build the app
+
+## Start the app
+- `npm run start` to start the app and get access via http://127.0.0.1:3000
+
+
+## Test the app
+- add a `database.json` file in the root directory and set the missing `###` parameters
 ```
-
-Create a user and grant access to this database
-
-```bash
-CREATE USER <user_name> WITH PASSWORD '<password>';
-
-GRANT ALL PRIVILEGES ON DATABASE <db_name> TO <username>;
+{
+  "dev": {
+    "driver": "pg",
+    "host": "127.0.0.1",
+    "port": 5432,
+    "database": "storefront",
+    "user": "###",
+    "password": "###"
+  },
+  "test": {
+    "driver": "pg",
+    "host": "127.0.0.1",
+    "port": 5433,
+    "database": "storefront",
+    "user": "###",
+    "password": "###"
+  }
+}
 ```
-
-Now you can connect to create your production database.
-
-```bash
-\c <db_name>
-```
-
-open the second terminal and start the migration using db-migrate :
-
-```bash
-db-migrate up
-```
-
-undo migration
-
-```bash
-db-migrate down
-```
-
-If you get an assertion error : permission denied for schema public, the you should give the created user a super user role like that
-
-* But beware with this option because it's not recommended due to security cautions.
-
-```bash
-ALTER USER <user_name> WITH SUPERUSER;
-```
-
-## Notes
-
-* If you don't find .env file in the repo, create one that includes the environment variables needed.
-* Requirements file is also included in this repo
-
-
+- `npm run test` to run all tests

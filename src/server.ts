@@ -1,21 +1,33 @@
-import express, { Request, Response } from 'express';
-import bodyParser from 'body-parser';
-import usersRoute from './route/user';
-import productsRoute from './route/product';
-import ordersRoute from './route/order';
+import express, {Application, Request, Response} from "express"
+import bodyParser from "body-parser"
+import path from "path"
 
+import userRoutes from "./handlers/user"
+import productRoutes from "./handlers/product"
+import orderRoutes from "./handlers/orders"
 
-const app: express.Application = express();
-const address: string = "0.0.0.0:3000";
-app.use(bodyParser.json());
+const app: Application = express()
 
+let port: number = 3000
 
-productsRoute(app);
-usersRoute(app);
-ordersRoute(app);
+if (process.env.ENV === "test") {
+  port = 3001
+}
 
-app.listen(3000,  ()=> {
-    console.log(`starting app on: ${address}`)
-});
+const address: string = `127.0.0.1:${port}`
 
-export default app;
+app.use(bodyParser.json())
+
+app.get("/", (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, "../index.html"))
+})
+
+userRoutes(app)
+productRoutes(app)
+orderRoutes(app)
+
+app.listen(port, () => {
+  console.info(`Starting app on: ${address}`)
+})
+
+export default app
