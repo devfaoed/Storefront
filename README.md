@@ -1,7 +1,68 @@
-# Storefront Backend Project
+## Task 2: Build A Storefront Backend
 
-## Prepare env
-- add a `.env` file in the root directory and set the missing `###` environment parameters
+Udacity Advanced Full-stack nano degree second project
+
+## Tech
+
+* Runtime: Node.js (JavaScript)
+* Web application framework: Express
+* Language: TypeScript
+* Database: Postgres
+* Testing: Jasmine and Supertest
+
+## Dependancies: you can find them in package.json
+
+* bcrypt
+* body-parser
+* cors
+* db-migrate
+* db-migrate-pg
+* dotenv
+* express
+* jsonwebtoken
+* pg : using postgresql
+* typescript
+
+## DevDependancies
+
+* @types/bcrypt
+* @types/express
+* @types/jasmine
+* @types/jsonwebtoken
+* @types/pg
+* @types/supertest
+* @typescript-eslint/eslint-plugin
+* @typescript-eslint/parser
+* eslint
+* jasmine
+* jasmine-spec-reporter
+* jasmine-ts
+* supertest
+* ts-node
+* tsc-watch
+
+## The Ports
+
+### APP
+
+This App RUNS port PORT 3000 [http://localhost:4000](http://localhost:4000)
+
+* BUT YOU CAN CHANGE THIS IN THE SERVER FILE IF NEEDED
+
+### DATABASE
+
+RUNS ON PORT 5432 [http://localhost:5432](http://localhost:5432) (LOCAL HOST)
+
+* POSTGRES HOST IS AN ENVIRONMENT VARIABLE
+
+## Setup
+
+### databse runs on localhost:5432
+
+First you need install all packages from the terminal. since package.json contains them all, you just need to run this command
+
+```bash
+npm install
 ```
 POSTGRES_HOST=127.0.0.1
 POSTGRES_PORT=5432
